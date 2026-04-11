@@ -1,0 +1,9 @@
+com\example\fruitdetection\dto\FruitDetectionResponse.class
+com\example\fruitdetection\service\FruitDetectionService.class
+com\example\fruitdetection\exception\GlobalExceptionHandler.class
+com\example\fruitdetection\controller\FruitDetectionController.class
+com\example\fruitdetection\dto\BaseResponse.class
+com\example\fruitdetection\dto\FruitDetectionRequest.class
+com\example\fruitdetection\controller\HealthController.class
+com\example\fruitdetection\FruitDetectionApplication.class
+com\example\fruitdetection\service\impl\FruitDetectionServiceImpl.class
