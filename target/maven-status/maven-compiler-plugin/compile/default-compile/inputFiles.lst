@@ -3,9 +3,11 @@ D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\controller
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\controller\HealthController.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\controller\TestController.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\dto\BaseResponse.java
+D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\dto\DetectionBox.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\dto\FruitDetectionRequest.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\dto\FruitDetectionResponse.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\exception\GlobalExceptionHandler.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\FruitDetectionApplication.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\service\FruitDetectionService.java
 D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\service\impl\FruitDetectionServiceImpl.java
+D:\AI\claude\fruit-detection\src\main\java\com\example\fruitdetection\utils\OpenCVUtils.java

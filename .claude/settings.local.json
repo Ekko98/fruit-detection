@@ -21,7 +21,27 @@
       "Bash(echo \"  repositoryformatversion = 0\")",
       "Bash(echo \"  filemode = false\")",
       "Bash(echo \"  bare = false\")",
-      "Bash(echo \"  logallrefupdates = true\")"
+      "Bash(echo \"  logallrefupdates = true\")",
+      "Bash(git ls-remote:*)",
+      "Bash(mkdir -p ~/.claude/skills/)",
+      "Bash(cp -r ~/.claude/plugins/cache/claude-hud/github-repo-manager ~/.claude/skills/)",
+      "Bash(mvn spring-boot:run)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :8080)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(mvn spring-boot:run -Dserver.port=8081)",
+      "Bash(unzip -p src/main/resources/opencv/opencv_java451.dll.zip opencv_java451.dll)",
+      "Bash(wget -O opencv-4.5.1-windows.exe https://github.com/opencv/opencv/releases/download/4.5.1/opencv-4.5.1-windows.exe)",
+      "Bash(mvn clean:*)",
+      "Bash(python download_model.py)",
+      "Bash(python -c \"import torch, cv2, PIL, ultralytics; print\\('所有依赖已安装'\\); print\\(f'PyTorch版本: {torch.__version__}'\\); print\\(f'OpenCV版本: {cv2.__version__}'\\); print\\(f'PIL版本: {PIL.__version__}'\\)\")",
+      "Bash(pip list:*)",
+      "Bash(mvn compile:*)",
+      "Bash(python test_detector.py)",
+      "Bash(python:*)",
+      "Bash(where python:*)",
+      "Bash(pip install:*)"
     ]
   }
 }

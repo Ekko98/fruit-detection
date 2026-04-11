@@ -13,6 +13,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <spring.boot.version>2.7.5</spring.boot.version>
+        <!-- OpenCV native library path -->
+        <opencv.library.path>${project.basedir}/src/main/resources/opencv</opencv.library.path>
     </properties>
 
     <dependencies>

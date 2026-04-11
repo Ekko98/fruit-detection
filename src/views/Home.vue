@@ -39,25 +39,25 @@
         </div>
       </div>
 
-      <div class="statistics-section" v-if="statistics.total > 0">
+      <div class="statistics-section" v-if="currentStatistics.total > 0">
         <div class="stats-card">
-          <h3>检测统计</h3>
+          <h3>检测统计 ({{ currentStatistics.total }} 个水果)</h3>
           <div class="stats-content">
             <div class="stat-item">
-              <span>总检测数:</span>
-              <span>{{ statistics.total }}</span>
+              <span>总水果数:</span>
+              <span>{{ currentStatistics.total }}</span>
             </div>
             <div class="stat-item">
-              <span>新鲜水果:</span>
-              <span class="fresh">{{ statistics.fresh }}</span>
+              <span>新鲜:</span>
+              <span class="fresh">{{ currentStatistics.fresh }}</span>
             </div>
             <div class="stat-item">
-              <span>腐烂水果:</span>
-              <span class="rotten">{{ statistics.rotten }}</span>
+              <span>腐烂:</span>
+              <span class="rotten">{{ currentStatistics.rotten }}</span>
             </div>
             <div class="stat-item">
               <span>新鲜率:</span>
-              <span>{{ total > 0 ? ((statistics.fresh / statistics.total) * 100).toFixed(1) : 0 }}%</span>
+              <span>{{ currentStatistics.total > 0 ? ((currentStatistics.fresh / currentStatistics.total) * 100).toFixed(1) : 0 }}%</span>
             </div>
           </div>
         </div>
@@ -65,25 +65,37 @@
 
       <div class="result-section" v-if="detectionResult">
         <div class="result-card">
-          <h3>检测结果</h3>
-          <div class="result-content">
-            <div class="result-item">
-              <span>水果类型:</span>
-              <span>{{ detectionResult.fruitType }}</span>
-            </div>
-            <div class="result-item">
-              <span>新鲜度:</span>
+          <h3>检测结果 (共 {{ detectionResult.detections.length }} 个)</h3>
+
+          <!-- 主要结果（第一个） -->
+          <div class="result-item primary">
+            <span>主要检测:</span>
+            <div class="result-details">
+              <span class="fruit-type">{{ detectionResult.fruitType }}</span>
               <span :class="detectionResult.freshness === 'fresh' ? 'fresh' : 'rotten'">
                 {{ detectionResult.freshness === 'fresh' ? '新鲜' : '腐烂' }}
               </span>
+              <span class="confidence">{{ (detectionResult.confidence * 100).toFixed(1) }}%</span>
             </div>
-            <div class="result-item">
-              <span>置信度:</span>
-              <span>{{ (detectionResult.confidence * 100).toFixed(1) }}%</span>
-            </div>
-            <div class="result-item">
-              <span>检测框坐标:</span>
-              <span>X: {{ (detectionResult.x * 100).toFixed(1) }}%, Y: {{ (detectionResult.y * 100).toFixed(1) }}%, W: {{ (detectionResult.width * 100).toFixed(1) }}%, H: {{ (detectionResult.height * 100).toFixed(1) }}%</span>
+          </div>
+
+          <!-- 所有检测结果列表 -->
+          <div class="all-detections">
+            <h4>详细检测结果：</h4>
+            <div class="detection-list" v-for="(box, index) in detectionResult.detections" :key="index">
+              <div class="detection-item">
+                <span class="detection-index">{{ index + 1 }}.</span>
+                <div class="detection-info">
+                  <span class="fruit-type">{{ box.fruitType }}</span>
+                  <span :class="box.freshness === 'fresh' ? 'fresh' : 'rotten'">
+                    {{ box.freshness === 'fresh' ? '新鲜' : '腐烂' }}
+                  </span>
+                  <span class="confidence">{{ (box.confidence * 100).toFixed(1) }}%</span>
+                </div>
+                <div class="detection-coords">
+                  X: {{ (box.x * 100).toFixed(1) }}%, Y: {{ (box.y * 100).toFixed(1) }}%, W: {{ (box.width * 100).toFixed(1) }}%, H: {{ (box.height * 100).toFixed(1) }}%
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -146,7 +158,16 @@ export default {
     },
     detectionBoxes() {
       if (!this.detectionResult) return []
-      return [this.detectionResult] // 支持多个检测框
+      return this.detectionResult.detections || []
+    },
+    currentStatistics() {
+      if (!this.detectionResult) return { total: 0, fresh: 0, rotten: 0 }
+      const detections = this.detectionResult.detections || []
+      return {
+        total: detections.length,
+        fresh: detections.filter(d => d.freshness === 'fresh').length,
+        rotten: detections.filter(d => d.freshness === 'rotten').length
+      }
     }
   },
   methods: {
@@ -159,6 +180,7 @@ export default {
         const reader = new FileReader()
         reader.onload = (e) => {
           this.$store.commit('setImageUrl', e.target.result)
+          this.$store.commit('clearDetectionResult') // 清除旧的检测结果
           this.imageUrl = e.target.result
           this.imageLoaded = false
         }
@@ -168,6 +190,7 @@ export default {
     clearImage() {
       this.imageUrl = null
       this.$store.commit('setImageUrl', null)
+      this.$store.commit('clearDetectionResult') // 清除检测结果
       this.$refs.fileInput.value = ''
       this.imageLoaded = false
     },
@@ -403,6 +426,105 @@ export default {
   color: #666;
 }
 
+.result-item.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.result-item.primary span:first-child {
+  color: white;
+  font-size: 1.1rem;
+}
+
+.primary .result-details {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.primary .fruit-type {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.primary .fresh {
+  font-size: 1.1rem;
+}
+
+.primary .confidence {
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 12px;
+  border-radius: 15px;
+}
+
+.all-detections h4 {
+  margin: 20px 0 10px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.detection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.detection-item {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s;
+}
+
+.detection-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detection-index {
+  font-weight: bold;
+  color: #667eea;
+  min-width: 25px;
+}
+
+.detection-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+}
+
+.detection-info .fruit-type {
+  font-weight: bold;
+  color: #333;
+}
+
+.detection-info .fresh {
+  color: #28a745;
+}
+
+.detection-info .rotten {
+  color: #dc3545;
+}
+
+.detection-info .confidence {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.detection-coords {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
 .fresh {
   color: #28a745;
 }
@@ -507,7 +629,8 @@ export default {
 
 .history-item {
   display: flex;
-  background: #f8f9fa;
+  background: white;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 10px;
   transition: all 0.3s;
@@ -515,22 +638,27 @@ export default {
 
 .history-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
 }
 
 .history-image {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   border-radius: 8px;
   overflow: hidden;
-  margin-right: 10px;
+  margin-right: 12px;
   flex-shrink: 0;
+  border: 2px solid #e9ecef;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .history-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* 使用 contain 确保完整显示图片 */
+  background: white;
 }
 
 .placeholder {
@@ -550,30 +678,36 @@ export default {
 .history-item-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 5px;
 }
 
 .history-item-header .fruit-type {
   font-weight: bold;
   color: #333;
+  font-size: 1rem;
 }
 
 .history-item-header .fresh {
   color: #28a745;
+  font-weight: bold;
 }
 
 .history-item-header .rotten {
   color: #dc3545;
+  font-weight: bold;
 }
 
 .history-item-header .confidence {
   color: #6c757d;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .history-item-time {
-  font-size: 0.8rem;
-  color: #6c757d;
+  font-size: 0.75rem;
+  color: #adb5bd;
+  margin-top: 3px;
 }
 
 @keyframes fadeIn {
