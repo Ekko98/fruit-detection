@@ -127,3 +127,6 @@ yarn.lock
 # Build artifacts
 build/
 dist/
+
+#AI
+.claude/
