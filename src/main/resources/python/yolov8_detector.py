@@ -10,24 +10,18 @@ from PIL import Image
 from ultralytics import YOLO
 
 
-DEFAULT_DETECTION = {
-    'fruit_type': 'apple',
-    'freshness': 'fresh',
-    'confidence': 0.95,
-    'x': 0.2,
-    'y': 0.3,
-    'width': 0.4,
-    'height': 0.4,
-}
-
-
 def build_response(detections):
-    if not detections:
-        detections = [DEFAULT_DETECTION]
-
-    primary = detections[0]
-    response = dict(primary)
-    response['detections'] = detections
+    """构建响应 - 无水果时返回空detections"""
+    response = {
+        'fruit_type': None,
+        'freshness': None,
+        'confidence': 0,
+        'x': 0,
+        'y': 0,
+        'width': 0,
+        'height': 0,
+        'detections': detections if detections else []
+    }
     return response
 
 

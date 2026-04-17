@@ -1,135 +1,148 @@
 # 水果腐烂检测系统
 
-## 项目介绍
-这是一个基于 Spring Boot 的水果腐烂检测系统，使用 YOLOv8 模型进行水果新鲜度检测。
+基于 Spring Boot + Vue + YOLOv8 的水果新鲜度智能检测系统。
 
 ## 技术栈
-- Java 8
-- Spring Boot 2.7.5
-- Maven
-- YOLOv8 (预留接口，目前为 mock 实现)
 
-## 功能特性：
+| 层级 | 技术 |
+|------|------|
+| 后端 | Java 8 + Spring Boot 2.7.5 + Maven |
+| 前端 | Vue 2.x + Vuex + Axios |
+| 检测 | Python + YOLOv8 + Flask |
 
-### 后端特性：
-1. **健康检查接口** - `/api/health` 返回 `{ "status": "ok" }`
-2. **全局异常处理** - 统一处理各种异常
-3. **标准分层结构** - Controller/Service/DTO 分离
-4. **统一响应格式** - 所有接口返回标准化 JSON
-5. **水果检测接口** - `/api/detect` (目前为 mock 实现)
-6. **Maven 配置** - 完整的 pom.xml
-7. **应用配置** - application.properties
+## 功能特性
 
-### 前端特性：
-1. **水果风格界面** - 简洁美观的 UI 设计
-2. **图片上传功能** - 支持本地图片上传
-3. **实时检测** - 点击按钮立即获取检测结果
-4. **响应式设计** - 适配不同屏幕尺寸
-5. **Vue 2.x** - 使用 Vue 框架开发
-6. **Vuex 状态管理** - 管理应用状态
-7. **axios 请求** - 与后端 API 通信
+- **图片检测**：上传图片检测水果新鲜度
+- **实时检测**：开启摄像头实时检测
+- **检测结果**：显示水果类型、新鲜度、置信度
+- **检测框标注**：在图片上标注检测区域
+- **历史记录**：保存最近10条检测记录
 
 ## 项目结构
+
 ```
 fruit-detection/
-├── pom.xml                    # Maven 配置
-├── package.json               # Node.js 依赖配置
-├── vue.config.js              # Vue 配置
-├── README.md                  # 项目说明
-├── src/                       # Vue 源码
-│   ├── main.js                # Vue 入口文件
-│   ├── App.vue                # 主应用组件
-│   ├── router/                # 路由配置
-│   │   └── index.js
-│   ├── store/                 # Vuex 状态管理
-│   │   └── index.js
-│   ├── views/                 # 页面组件
-│   │   └── Home.vue           # 主页面
-│   ├── http/                  # HTTP 请求
-│   │   └── axios.js
-│   └── public/                # 静态资源
-│       └── index.html
-└── src/main/java/com/example/fruitdetection/
-    ├── controller/            # 控制器层
-    │   ├── FruitDetectionController.java    # 水果检测接口
-    │   └── HealthController.java           # 健康检查接口
-    ├── service/               # 服务层
-    │   ├── FruitDetectionService.java      # 水果检测服务接口
-    │   └── impl/FruitDetectionServiceImpl.java  # 水果检测服务实现
-    ├── dto/                   # 数据传输对象
-    │   ├── BaseResponse.java              # 统一响应格式
-    │   ├── FruitDetectionRequest.java     # 检测请求DTO
-    │   └── FruitDetectionResponse.java    # 检测响应DTO
-    ├── exception/             # 异常处理
-    │   └── GlobalExceptionHandler.java    # 全局异常处理器
-    └── FruitDetectionApplication.java     # 应用启动类
+├── start.bat                   # 一键启动脚本
+├── pom.xml                     # Maven 配置
+├── package.json                # Node.js 依赖
+├── vue.config.js               # Vue 配置
+├── src/                        # Vue 前端源码
+│   ├── views/Home.vue          # 主页面
+│   ├── store/index.js          # Vuex 状态管理
+│   └── http/axios.js           # HTTP 请求配置
+└── src/main/
+    ├── java/                   # Java 后端源码
+    │   └── com/example/fruitdetection/
+    │       ├── controller/     # 控制器层
+    │       ├── service/        # 服务层
+    │       ├── dto/            # 数据传输对象
+    │       └── exception/      # 异常处理
+    └── resources/
+        ├── python/             # Python 检测服务
+        │   ├── fruit_detection_service.py  # Flask 常驻服务
+        │   ├── yolov8_detector.py          # 进程调用脚本
+        │   └── models/last.pt              # YOLOv8 模型
+        └── opencv/             # OpenCV 库
 ```
 
-## 快速开始
+## 快速启动
 
-### 1. 后端启动
+### 方式一：一键启动（推荐）
+
 ```bash
-# 构建项目
-mvn clean install
+start.bat
+```
 
-# 运行后端
+等待约30秒，所有服务启动完成后访问 http://localhost:8081
+
+### 方式二：分别启动
+
+```bash
+# 1. 启动 Python 检测服务（预加载模型，提高检测速度）
+cd src/main/resources/python
+py fruit_detection_service.py
+
+# 2. 启动 Java 后端（等待Python服务启动后）
 mvn spring-boot:run
-```
 
-### 2. 前端启动
-```bash
-# 安装依赖
-npm install
-
-# 启动开发服务器
+# 3. 启动 Vue 前端
 npm run serve
 ```
 
-### 3. 访问应用
-- 前端: http://localhost:8081
-- 后端API: http://localhost:8080
+### 服务端口
 
-### 4. API 接口
+| 服务 | 端口 | 说明 |
+|------|------|------|
+| Python 检测服务 | 5005 | YOLOv8 模型推理 |
+| Java 后端 | 8080 | REST API |
+| Vue 前端 | 8081 | Web 界面 |
 
-#### 健康检查
+## API 接口
+
+### 健康检查
 ```
-GET http://localhost:8080/api/health
+GET /api/health
 响应: { "status": "ok" }
 ```
 
-#### 水果检测 (POST)
+### 水果检测
 ```
-POST http://localhost:8080/api/detect
-请求体:
-{
-  "imageUrl": "图片URL或base64数据"
-}
+POST /api/detect
+请求体: { "imageUrl": "base64图片数据" }
 
 响应:
 {
   "code": 200,
   "message": "success",
   "data": {
-    "fruitType": "apple",
-    "freshness": "fresh",
-    "confidence": 0.95
+    "fruitType": "apple",      // 水果类型
+    "freshness": "fresh",      // fresh 或 rotten
+    "confidence": 0.85,        // 置信度
+    "detections": [...]        // 检测框列表
   }
 }
 ```
 
-## API 文档
-- `/api/health` - 健康检查接口
-- `/api/detect` - 水果检测接口（POST）
+### 无水果检测结果
+```
+响应:
+{
+  "code": 200,
+  "data": {
+    "fruitType": null,
+    "freshness": null,
+    "confidence": 0,
+    "detections": []
+  }
+}
+```
+
+## 检测性能
+
+| 模式 | 单次检测耗时 | 说明 |
+|------|-------------|------|
+| Flask 服务模式 | 0.2-0.5秒 | 模型预加载，推荐 |
+| 进程调用模式 | 2-3秒 | 每次启动新进程 |
 
 ## 注意事项
-1. 当前检测功能为 mock 实现，实际项目中需要集成 YOLOv8 模型
-2. 图片上传大小限制为 10MB
-3. 支持 CORS 跨域请求
 
-## 开发计划
-- [ ] 集成 YOLOv8 模型
-- [ ] 实现图片上传功能
-- [ ] 实现实时摄像头检测
-- [ ] 前端 Vue 界面开发
-- [ ] 添加用户认证和权限管理
-- [ ] 优化性能和错误处理
+1. **启动顺序**：先启动 Python 服务（加载模型约10秒），再启动 Java 后端
+2. **模型文件**：需要将训练好的 YOLOv8 模型放在 `src/main/resources/python/models/last.pt`
+3. **图片限制**：上传图片最大 10MB
+4. **CORS**：已配置允许跨域请求
+
+## 配置说明
+
+### application.properties
+```properties
+# 使用 Python Flask 服务模式（推荐）
+fruit.detection.use-service=true
+
+# 改为 false 使用进程调用模式（较慢）
+```
+
+## 开发环境
+
+- JDK 8+
+- Node.js 16+
+- Python 3.8+ (需安装: flask, ultralytics, opencv-python, pillow, numpy)

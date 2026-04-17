@@ -130,3 +130,6 @@ dist/
 
 #AI
 .claude/
+
+# SSL Certificates
+certs/
