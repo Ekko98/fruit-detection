@@ -575,127 +575,254 @@ export default {
 </script>
 
 <style scoped>
-/* 基础样式 */
+/* 多巴胺风格 - 活泼明亮的设计 */
 .home {
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d1b2a 100%);
-  color: #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #ffecd2 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color: #1a1a2e;
   font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Header */
+/* 背景动画 */
+.home::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(255, 107, 237, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(72, 219, 251, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(254, 202, 87, 0.2) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Header - 多巴胺风格 */
 .header {
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%);
-  border: 1px solid rgba(0, 245, 255, 0.3);
-  border-radius: 20px;
-  padding: 30px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+  border: 3px solid transparent;
+  border-image: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3) 1;
+  border-radius: 24px;
+  padding: 35px;
   margin-bottom: 30px;
   text-align: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
 }
 
 .header h1 {
-  font-size: 2.5rem;
-  color: #00f5ff;
+  font-size: 2.8rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
-  text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  letter-spacing: 2px;
 }
 
 .header p {
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 10px;
-  font-size: 1rem;
+  color: #6c5ce7;
+  margin-top: 12px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
-/* 模式切换 */
+/* 模式切换 - 多巴胺按钮 */
 .mode-switch {
   display: flex;
   justify-content: center;
   gap: 20px;
   margin-bottom: 30px;
+  position: relative;
+  z-index: 1;
 }
 
 .mode-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(0, 245, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 15px 40px;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  color: #6c5ce7;
+  padding: 16px 45px;
+  border-radius: 50px;
   font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
   gap: 10px;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+  position: relative;
+}
+
+.mode-btn::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #feca57);
+  border-radius: 53px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .mode-btn:hover {
-  background: rgba(0, 245, 255, 0.1);
-  border-color: rgba(0, 245, 255, 0.5);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+}
+
+.mode-btn:hover::before {
+  opacity: 1;
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
-  border-color: #00f5ff;
-  color: #00f5ff;
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
 }
 
-/* 玻璃卡片 */
+.mode-btn.active::before {
+  opacity: 1;
+  background: linear-gradient(135deg, #feca57, #ff6b6b, #48dbfb, #ff9ff3);
+  animation: borderRotate 3s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* 玻璃卡片 - 多巴胺风格 */
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(0, 245, 255, 0.2);
-  border-radius: 20px;
-  padding: 25px;
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 24px;
+  padding: 28px;
+  backdrop-filter: blur(20px);
   margin-bottom: 25px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #feca57, #48dbfb, #ff6b6b);
+  background-size: 200% 100%;
+  animation: gradientMove 3s linear infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 .glass-card h3 {
-  color: #00f5ff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 20px 0;
-  font-size: 1.3rem;
-  border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+  font-size: 1.4rem;
+  font-weight: 700;
   padding-bottom: 15px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
 }
 
-/* 上传区域 */
+/* 上传区域 - 多巴胺风格 */
 .upload-area {
-  border: 2px dashed rgba(0, 245, 255, 0.3);
-  border-radius: 15px;
-  padding: 40px;
+  border: 3px dashed #c4b5fd;
+  border-radius: 20px;
+  padding: 45px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
-  min-height: 200px;
+  min-height: 220px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(240, 147, 251, 0.05) 100%);
 }
 
 .upload-area:hover {
-  border-color: #00f5ff;
-  background: rgba(0, 245, 255, 0.05);
-  box-shadow: inset 0 0 30px rgba(0, 245, 255, 0.1);
+  border-color: #764ba2;
+  border-style: solid;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+  transform: scale(1.02);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
 }
 
 .upload-placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #6c5ce7;
 }
 
 .upload-placeholder i {
-  font-size: 3rem;
-  color: #00f5ff;
-  margin-bottom: 15px;
-  animation: float 3s ease-in-out infinite;
+  font-size: 4rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 18px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
 }
 
 .upload-placeholder p {
-  margin: 10px 0;
+  margin: 12px 0;
+  font-weight: 500;
+  font-size: 1.1rem;
 }
 
 .upload-tip {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
+  color: #a29bfe;
+  font-size: 0.95rem;
 }
 
 /* 图片预览 */
@@ -733,68 +860,97 @@ export default {
   transform: rotate(90deg);
 }
 
-/* 检测框 */
+/* 检测框 - 多巴胺风格 */
 .detection-box {
   position: absolute;
-  border: 2px solid #00f5ff;
-  border-radius: 4px;
+  border: 3px solid #764ba2;
+  border-radius: 8px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  animation: fadeIn 0.3s ease;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 20px rgba(118, 75, 162, 0.4);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .detection-box.fresh {
-  border-color: #00ff88;
+  border-color: #00d2d3;
+  box-shadow: 0 0 25px rgba(0, 210, 211, 0.5);
 }
 
 .detection-box.rotten {
   border-color: #ff6b6b;
+  box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
 }
 
 .detection-label {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
   color: white;
   white-space: nowrap;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .detection-label.fresh {
-  background: rgba(0, 255, 136, 0.8);
+  background: linear-gradient(135deg, #00d2d3 0%, #10ac84 100%);
+  box-shadow: 0 4px 15px rgba(0, 210, 211, 0.4);
 }
 
 .detection-label.rotten {
-  background: rgba(255, 107, 107, 0.8);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 }
 
-/* 霓虹按钮 */
+/* 霓虹按钮 - 多巴胺风格 */
 .neon-btn {
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.3) 0%, rgba(0, 128, 255, 0.3) 100%);
-  border: 1px solid #00f5ff;
-  color: #00f5ff;
-  padding: 15px 35px;
-  border-radius: 15px;
-  font-size: 1.1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 18px 45px;
+  border-radius: 50px;
+  font-size: 1.15rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.neon-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.neon-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .neon-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.5) 0%, rgba(0, 128, 255, 0.5) 100%);
-  box-shadow: 0 0 40px rgba(0, 245, 255, 0.5);
-  transform: translateY(-2px);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);
 }
 
 .neon-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-  box-shadow: none;
+  transform: none;
 }
 
 .detect-btn {
@@ -807,15 +963,21 @@ export default {
   margin-top: 20px;
 }
 
-/* 结果展示 */
+/* 结果展示 - 多巴胺风格 */
 .result-primary {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  border-radius: 15px;
-  background: rgba(0, 245, 255, 0.1);
-  border: 1px solid rgba(0, 245, 255, 0.3);
+  gap: 25px;
+  padding: 25px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  transition: all 0.3s;
+}
+
+.result-primary:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
 }
 
 /* 无水果检测结果样式 */
@@ -823,17 +985,17 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 30px;
-  border-radius: 15px;
-  background: rgba(150, 150, 150, 0.1);
-  border: 1px solid rgba(150, 150, 150, 0.3);
+  padding: 35px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(162, 155, 254, 0.1) 0%, rgba(108, 92, 231, 0.1) 100%);
+  border: 2px dashed #a29bfe;
 }
 
 .empty-icon {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  background: rgba(150, 150, 150, 0.2);
+  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -841,7 +1003,7 @@ export default {
 
 .empty-icon i {
   font-size: 2rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: white;
 }
 
 .empty-info {
@@ -851,71 +1013,80 @@ export default {
 }
 
 .empty-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .empty-tip {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
+  color: #6c5ce7;
+  font-size: 0.95rem;
 }
 
 .result-primary.fresh {
-  background: rgba(0, 255, 136, 0.1);
-  border-color: rgba(0, 255, 136, 0.3);
+  background: linear-gradient(135deg, rgba(0, 210, 211, 0.15) 0%, rgba(16, 172, 132, 0.15) 100%);
+  border-color: rgba(0, 210, 211, 0.4);
 }
 
 .result-primary.rotten {
-  background: rgba(255, 107, 107, 0.1);
-  border-color: rgba(255, 107, 107, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 36, 0.15) 100%);
+  border-color: rgba(255, 107, 107, 0.4);
 }
 
 .result-icon {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  background: rgba(0, 245, 255, 0.2);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .result-icon i {
-  font-size: 2rem;
-  color: #00f5ff;
+  font-size: 2.2rem;
+  color: white;
 }
 
 .result-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .fruit-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
+  font-size: 1.7rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .freshness-tag {
-  padding: 5px 15px;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .freshness-tag, .status.fresh {
-  background: rgba(0, 255, 136, 0.2);
-  color: #00ff88;
+  background: linear-gradient(135deg, #00d2d3 0%, #10ac84 100%);
+  color: white;
 }
 
 .freshness-tag, .status.rotten {
-  background: rgba(255, 107, 107, 0.2);
-  color: #ff6b6b;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: white;
 }
 
 .confidence-value {
-  color: rgba(255, 255, 255, 0.8);
+  color: #6c5ce7;
+  font-weight: 600;
 }
 
 .all-detections h4 {
@@ -961,65 +1132,102 @@ export default {
   font-size: 0.85rem;
 }
 
-/* 统计卡片 */
+/* 统计卡片 - 多巴胺风格 */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  gap: 18px;
 }
 
 .stat-item {
   text-align: center;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+  padding: 22px 15px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border-radius: 18px;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
 }
 
 .stat-item.fresh {
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px solid rgba(0, 255, 136, 0.2);
+  background: linear-gradient(135deg, rgba(0, 210, 211, 0.15) 0%, rgba(16, 172, 132, 0.15) 100%);
+  border-color: rgba(0, 210, 211, 0.3);
+}
+
+.stat-item.fresh::before {
+  background: linear-gradient(90deg, #00d2d3, #10ac84);
 }
 
 .stat-item.rotten {
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.2);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 36, 0.15) 100%);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.stat-item.rotten::before {
+  background: linear-gradient(90deg, #ff6b6b, #ee5a24);
 }
 
 .stat-value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #00f5ff;
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   display: block;
 }
 
 .stat-item.fresh .stat-value {
-  color: #00ff88;
+  background: linear-gradient(135deg, #00d2d3 0%, #10ac84 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .stat-item.rotten .stat-value {
-  color: #ff6b6b;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .stat-label {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.9rem;
+  color: #6c5ce7;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 5px;
 }
 
-/* 摄像头区域 */
+/* 摄像头区域 - 多巴胺风格 */
 .camera-container {
   position: relative;
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
 }
 
 .camera-video {
   width: 100%;
   display: block;
-  border-radius: 15px;
+  border-radius: 20px;
 }
 
 .detection-overlay {
@@ -1033,48 +1241,53 @@ export default {
 
 .live-detection-box {
   position: absolute;
-  border: 2px solid #00f5ff;
-  border-radius: 4px;
-  animation: fadeIn 0.2s ease;
+  border: 3px solid #764ba2;
+  border-radius: 8px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 0 20px rgba(118, 75, 162, 0.5);
 }
 
 .live-detection-box.fresh {
-  border-color: #00ff88;
+  border-color: #00d2d3;
+  box-shadow: 0 0 25px rgba(0, 210, 211, 0.5);
 }
 
 .live-detection-box.rotten {
   border-color: #ff6b6b;
+  box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
 }
 
 .live-detection-label {
   position: absolute;
-  top: -25px;
+  top: -28px;
   left: 0;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 5px 14px;
+  border-radius: 15px;
+  font-size: 13px;
   color: white;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .live-detection-label.fresh {
-  background: rgba(0, 255, 136, 0.9);
+  background: linear-gradient(135deg, #00d2d3 0%, #10ac84 100%);
 }
 
 .live-detection-label.rotten {
-  background: rgba(255, 107, 107, 0.9);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
 }
 
-/* 扫描线动画 */
+/* 扫描线动画 - 多巴胺风格 */
 .scan-line {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #667eea, #f093fb, #feca57, transparent);
   animation: scan 2s linear infinite;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
 }
 
 .camera-placeholder {
@@ -1087,63 +1300,74 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(0, 0, 0, 0.3);
-  padding: 20px;
+  color: white;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(45, 45, 68, 0.95) 100%);
+  padding: 25px;
 }
 
 .camera-placeholder i:first-child {
-  font-size: 4rem;
-  margin-bottom: 15px;
-  color: #00f5ff;
+  font-size: 5rem;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
 }
 
 .placeholder-title {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .placeholder-tip {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 20px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 25px;
 }
 
 .placeholder-tip i {
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 .permission-tips {
   text-align: left;
-  background: rgba(0, 245, 255, 0.1);
-  border: 1px solid rgba(0, 245, 255, 0.2);
-  border-radius: 10px;
-  padding: 15px 20px;
-  max-width: 400px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.4);
+  border-radius: 15px;
+  padding: 18px 22px;
+  max-width: 420px;
   width: 90%;
 }
 
 .permission-tips p {
-  color: #00f5ff;
-  margin: 0 0 10px 0;
-  font-weight: bold;
+  color: #f093fb;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .permission-tips ul {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 22px;
 }
 
 .permission-tips li {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.85rem;
-  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  line-height: 1.9;
 }
 
 .camera-controls {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .camera-btn {
@@ -1151,104 +1375,135 @@ export default {
 }
 
 .stop-btn {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3) 0%, rgba(255, 50, 50, 0.3) 100%);
-  border-color: #ff6b6b;
-  color: #ff6b6b;
-  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
 }
 
 .stop-btn:hover {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.5) 0%, rgba(255, 50, 50, 0.5) 100%);
-  box-shadow: 0 0 40px rgba(255, 107, 107, 0.5);
+  box-shadow: 0 20px 50px rgba(255, 107, 107, 0.5);
 }
 
 .live-stats {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  margin-top: 15px;
-  padding: 10px;
-  background: rgba(0, 245, 255, 0.1);
-  border-radius: 10px;
+  gap: 25px;
+  margin-top: 18px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border-radius: 15px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
 }
 
 .live-stats.empty {
-  background: rgba(150, 150, 150, 0.1);
+  background: rgba(162, 155, 254, 0.1);
+  border-color: rgba(162, 155, 254, 0.3);
 }
 
 .no-fruit {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
+  color: #6c5ce7;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .live-count {
-  color: #00f5ff;
-  font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
 
 .live-fresh {
-  color: #00ff88;
+  background: linear-gradient(135deg, #00d2d3 0%, #10ac84 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
 }
 
 .live-rotten {
-  color: #ff6b6b;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
 }
 
-/* 历史记录 */
+/* 历史记录 - 多巴胺风格 */
 .history-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 245, 255, 0.2);
-  padding-bottom: 15px;
-  margin-bottom: 20px;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+}
+
+.history-header h3 {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .clear-history-btn {
-  background: rgba(255, 107, 107, 0.2);
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  color: #ff6b6b;
-  padding: 8px 15px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
 }
 
 .clear-history-btn:hover {
-  background: rgba(255, 107, 107, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
 }
 
 .history-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 18px;
 }
 
 .history-item {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 15px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border-radius: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  border: 1px solid rgba(0, 245, 255, 0.1);
+  gap: 12px;
+  border: 2px solid transparent;
   transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.history-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
 }
 
 .history-item:hover {
-  border-color: rgba(0, 245, 255, 0.3);
-  transform: translateY(-3px);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.25);
 }
 
 .history-image {
   width: 100%;
-  height: 100px;
-  border-radius: 8px;
+  height: 110px;
+  border-radius: 12px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
 }
 
 .history-image img {
@@ -1264,19 +1519,115 @@ export default {
 }
 
 .history-time {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 0.8rem;
+  color: #a29bfe;
+  font-size: 0.85rem;
+}
+
+/* 检测列表 - 多巴胺风格 */
+.all-detections h4 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 22px 0 18px 0;
+  font-weight: 600;
+}
+
+.detection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detection-item {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 15px 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+  border-radius: 14px;
+  border-left: 4px solid #764ba2;
+  transition: all 0.3s;
+}
+
+.detection-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
+}
+
+.detection-item .index {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  font-size: 1.2rem;
+  min-width: 25px;
+}
+
+.detection-item .fruit-type {
+  background: linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.detection-item .status {
+  padding: 5px 14px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.detection-item .confidence {
+  color: #6c5ce7;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* 图片预览 - 多巴胺风格 */
+.image-preview {
+  position: relative;
+}
+
+.detection-image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.detection-image-container img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.clear-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+
+.clear-btn:hover {
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
 }
 
 /* 动画 */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scan {
@@ -1287,12 +1638,12 @@ export default {
 /* 响应式 */
 @media (max-width: 768px) {
   .header h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .mode-switch {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
   }
 
   .mode-btn {
