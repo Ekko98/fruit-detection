@@ -53,7 +53,7 @@ fruit-detection/
 start.bat
 ```
 
-等待约30秒，所有服务启动完成后访问 http://localhost:8081
+等待约30秒，所有服务启动完成后访问 https://localhost:3000
 
 ### 方式二：分别启动
 
@@ -75,7 +75,7 @@ npm run serve
 |------|------|------|
 | Python 检测服务 | 5005 | YOLOv8 模型推理 |
 | Java 后端 | 8080 | REST API |
-| Vue 前端 | 8081 | Web 界面 |
+| Vue 前端 | 3000 (HTTPS) | Web 界面 |
 
 ## API 接口
 

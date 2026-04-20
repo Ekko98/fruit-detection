@@ -14,6 +14,10 @@ export default new Vuex.Store({
       fresh: 0,
       rotten: 0
     },
+    // 批量检测相关状态
+    batchImages: [],
+    batchResults: null,
+    isBatchDetecting: false,
     // 摄像头相关状态
     cameraActive: false,
     cameraStream: null,
@@ -32,6 +36,63 @@ export default new Vuex.Store({
     },
     setImageUrl(state, url) {
       state.imageUrl = url
+    },
+    // 批量检测 mutations
+    setBatchImages(state, images) {
+      state.batchImages = images
+    },
+    addBatchImage(state, image) {
+      if (state.batchImages.length < 10) {
+        state.batchImages.push(image)
+      }
+    },
+    removeBatchImage(state, index) {
+      state.batchImages.splice(index, 1)
+    },
+    clearBatchImages(state) {
+      state.batchImages = []
+      state.batchResults = null
+    },
+    setBatchResults(state, results) {
+      state.batchResults = results
+    },
+    setIsBatchDetecting(state, status) {
+      state.isBatchDetecting = status
+    },
+    appendToHistory(state, result) {
+      const detections = result.detections || []
+      if (detections.length === 0 || !result.fruitType) return
+
+      const sourceImage = result.imageUrl || result.imageData || null
+      const thumbnailUrl = result.annotatedImage || sourceImage
+
+      detections.forEach(box => {
+        if (!box.fruitType) return
+        const historyItem = {
+          id: Date.now() + Math.random(),
+          imageUrl: sourceImage,
+          thumbnailUrl,
+          fruitType: box.fruitType,
+          freshness: box.freshness,
+          confidence: box.confidence || 0,
+          timestamp: new Date().toLocaleString()
+        }
+        state.detectionHistory.unshift(historyItem)
+      })
+
+      if (state.detectionHistory.length > 10) {
+        state.detectionHistory = state.detectionHistory.slice(0, 10)
+      }
+
+      const validDetections = detections.filter(d => d.fruitType)
+      state.statistics.total += validDetections.length
+      validDetections.forEach(box => {
+        if (box.freshness === 'fresh') {
+          state.statistics.fresh++
+        } else {
+          state.statistics.rotten++
+        }
+      })
     },
     // 摄像头相关 mutations
     setCameraActive(state, active) {
@@ -124,6 +185,26 @@ export default new Vuex.Store({
         throw error
       } finally {
         commit('setIsDetecting', false)
+      }
+    },
+    async batchDetect({ commit, state }) {
+      commit('setIsBatchDetecting', true)
+      try {
+        const imageDataList = state.batchImages.map(img => img.data)
+        const response = await this._vm.$http.post('/batch-detect', { imageDataList })
+        const results = response.data || response
+        commit('setBatchResults', results.results)
+        // 将每张图的检测结果加入历史记录(append only not aggregate)
+        results.results.forEach(result => {
+          commit('appendToHistory', result)
+        })
+        return results
+      } catch (error) {
+        console.error('批量检测失败', error)
+        commit('setBatchResults', null)
+        throw error
+      } finally {
+        commit('setIsBatchDetecting', false)
       }
     }
   }

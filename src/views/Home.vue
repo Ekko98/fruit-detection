@@ -10,18 +10,22 @@
     <main class="main-content">
       <!-- 模式切换 -->
       <div class="mode-switch">
-        <button :class="['mode-btn', { active: !cameraMode }]" @click="switchMode('image')">
+        <button :class="['mode-btn', { active: mode === 'image' }]" @click="mode = 'image'">
           <i class="fas fa-image"></i>
           图片检测
         </button>
-        <button :class="['mode-btn', { active: cameraMode }]" @click="switchMode('camera')">
+        <button :class="['mode-btn', { active: mode === 'batch' }]" @click="mode = 'batch'">
+          <i class="fas fa-images"></i>
+          批量检测
+        </button>
+        <button :class="['mode-btn', { active: mode === 'camera' }]" @click="mode = 'camera'">
           <i class="fas fa-video"></i>
           实时检测
         </button>
       </div>
 
       <!-- 图片检测模式 -->
-      <div v-if="!cameraMode" class="detection-panel">
+      <div v-if="mode === 'image'" class="detection-panel">
         <div class="upload-section glass-card">
           <div class="upload-area" @click="selectImage" @dragover.prevent @drop.prevent="handleDrop">
             <input type="file" ref="fileInput" @change="handleFileSelect" accept="image/*" style="display: none;">
@@ -121,8 +125,107 @@
         </div>
       </div>
 
+      <!-- 批量检测模式 -->
+      <div v-if="mode === 'batch'" class="batch-panel">
+        <div class="batch-section glass-card">
+          <div class="batch-header">
+            <h3>上传图片</h3>
+            <span class="image-count">已选 {{ batchImages.length }}/10 张</span>
+          </div>
+
+          <div class="batch-upload-area" @click="selectBatchImages" @dragover.prevent @drop.prevent="batchHandleDrop">
+            <input type="file" ref="batchFileInput" @change="batchHandleFileSelect" accept="image/*" multiple style="display: none;">
+            <div v-if="batchImages.length === 0" class="upload-placeholder">
+              <i class="fas fa-plus-circle"></i>
+              <p>点击选择多张图片或拖拽到此处</p>
+              <span class="upload-tip">最多支持 10 张，支持 JPG、PNG</span>
+            </div>
+          </div>
+
+          <!-- 已选图片列表 -->
+          <div v-if="batchImages.length > 0" class="batch-image-list">
+            <div class="batch-thumbs">
+              <div v-for="(img, idx) in batchImages" :key="idx" class="batch-thumb">
+                <img :src="img.url" alt="图片">
+                <button @click="removeBatchImage(idx)" class="remove-thumb">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="batch-actions">
+              <button @click="selectMoreImages" class="add-more-btn">
+                <i class="fas fa-plus"></i>
+                继续添加
+              </button>
+              <button @click="startBatchDetect" :disabled="batchImages.length === 0" class="batch-detect-btn neon-btn">
+                <i class="fas fa-search"></i>
+                <span>{{ isBatchDetecting ? '检测中...' : '开始批量检测' }}</span>
+              </button>
+              <button @click="clearBatch" class="clear-all-btn">
+                <i class="fas fa-trash-alt"></i>
+                清空
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 批量检测结果 -->
+        <div v-if="batchResults && batchResults.length > 0" class="batch-results-section glass-card">
+          <h3>批量检测结果</h3>
+          <div class="batch-results-list">
+            <div v-for="(result, idx) in batchResults" :key="idx" class="batch-result-item">
+              <div class="result-image">
+                <img :src="result.imageUrl" alt="结果图片" v-if="result.imageUrl">
+                <div v-else class="result-placeholder"><i class="fas fa-image"></i></div>
+              </div>
+              <div class="result-info-card">
+                <div v-if="result.fruitType" class="result-tags">
+                  <span class="tag fruit-name">{{ result.fruitType }}</span>
+                  <span :class="['tag', 'tag-freshness', result.freshness]">
+                    {{ result.freshness === 'fresh' ? '新鲜' : '腐烂' }}
+                  </span>
+                  <span class="tag tag-confidence">{{ (result.confidence * 100).toFixed(1) }}%</span>
+                </div>
+                <div v-else class="result-empty-tag">
+                  <i class="fas fa-search"></i>
+                  <span>未检测到水果</span>
+                </div>
+                <div v-if="result.detections && result.detections.length > 1" class="result-count">
+                  共 {{ result.detections.length }} 个水果
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 批量统计 -->
+          <div class="batch-stats">
+            <div class="batch-stat-item">
+              <span class="stat-value">{{ batchTotalStats.total }}</span>
+              <span class="stat-label">总图片</span>
+            </div>
+            <div class="batch-stat-item">
+              <span class="stat-value">{{ batchTotalStats.fruits }}</span>
+              <span class="stat-label">水果数</span>
+            </div>
+            <div class="batch-stat-item">
+              <span class="stat-value">{{ batchTotalStats.freshCount }}</span>
+              <span class="stat-label">新鲜</span>
+            </div>
+            <div class="batch-stat-item">
+              <span class="stat-value">{{ batchTotalStats.rottenCount }}</span>
+              <span class="stat-label">腐烂</span>
+            </div>
+            <div class="batch-stat-item">
+              <span class="stat-value">{{ batchFreshRate }}%</span>
+              <span class="stat-label">新鲜率</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 摄像头检测模式 -->
-      <div v-if="cameraMode" class="camera-panel">
+      <div v-if="mode === 'camera'" class="camera-panel">
         <div class="camera-section glass-card">
           <div class="camera-container">
             <video ref="cameraVideo" autoplay playsinline muted class="camera-video"></video>
@@ -223,7 +326,7 @@ export default {
       imageUrl: null,
       imageLoaded: false,
       imageDimensions: { width: 0, height: 0 },
-      cameraMode: false,
+      mode: 'image', // 'image' | 'batch' | 'camera'
       cameraActive: false,
       detectionFrameInterval: null,
       liveDetectionBoxes: []
@@ -239,6 +342,32 @@ export default {
     // 过滤有效的历史记录（有水果类型的）
     validHistoryItems() {
       return this.detectionHistory.filter(item => item.fruitType && item.confidence > 0)
+    },
+    batchImages() {
+      return this.$store.state.batchImages
+    },
+    batchResults() {
+      return this.$store.state.batchResults
+    },
+    isBatchDetecting() {
+      return this.$store.state.isBatchDetecting
+    },
+    batchTotalStats() {
+      if (!this.batchResults) return { total: 0, fruits: 0, freshCount: 0, rottenCount: 0 }
+      let fruits = 0, fresh = 0, rotten = 0
+      this.batchResults.forEach(r => {
+        const detections = (r.detections || []).filter(d => d.fruitType)
+        fruits += detections.length
+        detections.forEach(d => {
+          if (d.freshness === 'fresh') fresh++
+          else rotten++
+        })
+      })
+      return { total: this.batchResults.length, fruits, freshCount: fresh, rottenCount: rotten }
+    },
+    batchFreshRate() {
+      if (this.batchTotalStats.fruits === 0) return 0
+      return ((this.batchTotalStats.freshCount / this.batchTotalStats.fruits) * 100).toFixed(1)
     },
     isDetecting() {
       return this.$store.state.isDetecting
@@ -265,9 +394,9 @@ export default {
   },
   methods: {
     // 模式切换
-    switchMode(mode) {
-      this.cameraMode = mode === 'camera'
-      if (mode === 'image') {
+    switchMode(newMode) {
+      this.mode = newMode
+      if (newMode !== 'camera') {
         this.stopCamera()
       }
     },
@@ -566,6 +695,57 @@ export default {
     // 清空历史
     clearHistory() {
       this.$store.commit('clearHistory')
+    },
+
+    // 批量检测相关方法
+    batchHandleDrop(e) {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
+      this.loadBatchFiles(files)
+    },
+    batchHandleFileSelect(event) {
+      const files = Array.from(event.target.files)
+      this.loadBatchFiles(files)
+      this.clearBatchInput()
+    },
+    selectBatchImages() {
+      if (this.$refs.batchFileInput) {
+        this.$refs.batchFileInput.value = ''
+        this.$refs.batchFileInput.click()
+      }
+    },
+    selectMoreImages() {
+      this.selectBatchImages()
+    },
+    loadBatchFiles(files) {
+      const remaining = 10 - this.batchImages.length
+      const toLoad = files.slice(0, remaining)
+      toLoad.forEach(file => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          this.$store.commit('addBatchImage', {
+            url: e.target.result,
+            data: e.target.result,
+            fileName: file.name
+          })
+        }
+        reader.readAsDataURL(file)
+      })
+    },
+    clearBatchInput() {
+      if (this.$refs.batchFileInput) {
+        this.$refs.batchFileInput.value = ''
+      }
+    },
+    removeBatchImage(index) {
+      this.$store.commit('removeBatchImage', index)
+      this.$store.commit('setBatchResults', null)
+    },
+    clearBatch() {
+      this.$store.commit('clearBatchImages')
+    },
+    async startBatchDetect() {
+      if (this.batchImages.length === 0) return
+      await this.$store.dispatch('batchDetect')
     }
   },
   beforeDestroy() {
@@ -1624,6 +1804,375 @@ export default {
   box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
 }
 
+/* 批量检测样式 - 多巴胺风格 */
+.batch-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.batch-section {
+  margin-bottom: 25px;
+}
+
+.batch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.batch-header h3 {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.image-count {
+  color: #6c5ce7;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+
+.batch-upload-area {
+  border: 3px dashed #c4b5fd;
+  border-radius: 20px;
+  padding: 45px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  min-height: 180px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(240, 147, 251, 0.05) 100%);
+}
+
+.batch-upload-area:hover {
+  border-color: #764ba2;
+  border-style: solid;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(240, 147, 251, 0.1) 100%);
+  transform: scale(1.01);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+}
+
+.batch-image-list {
+  margin-top: 20px;
+}
+
+.batch-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 15px 0;
+}
+
+.batch-thumb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #667eea, #764ba2) border-box;
+  transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.batch-thumb:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.35);
+}
+
+.batch-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-thumb {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+  transition: transform 0.2s;
+}
+
+.remove-thumb:hover {
+  transform: scale(1.2) rotate(90deg);
+}
+
+.batch-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  padding: 20px 0 10px;
+}
+
+.add-more-btn {
+  background: linear-gradient(135deg, #48dbfb, #0abde3);
+  border: none;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 25px rgba(72, 219, 251, 0.4);
+  transition: all 0.3s;
+}
+
+.add-more-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(72, 219, 251, 0.5);
+}
+
+.batch-detect-btn {
+  min-width: 220px;
+  justify-content: center;
+}
+
+.clear-all-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  border: none;
+  color: white;
+  padding: 14px 30px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+  transition: all 0.3s;
+}
+
+.clear-all-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(255, 107, 107, 0.5);
+}
+
+/* 批量检测结果 */
+.batch-results-section {
+  margin-top: 25px;
+}
+
+.batch-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.batch-result-item {
+  display: flex;
+  gap: 25px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  transition: all 0.3s;
+  align-items: center;
+}
+
+.batch-result-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.batch-result-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
+}
+
+.result-image {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.result-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #a29bfe;
+  font-size: 2rem;
+}
+
+.result-info-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-tags {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tag {
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.tag.fruit-name {
+  background: linear-gradient(135deg, #1a1a2e, #4a4a6a);
+  color: white;
+}
+
+.tag.tag-freshness {
+  color: white;
+}
+
+.tag.tag-freshness.fresh {
+  background: linear-gradient(135deg, #00d2d3, #10ac84);
+}
+
+.tag.tag-freshness.rotten {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+.tag.tag-confidence {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.result-empty-tag {
+  color: #a29bfe;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.result-count {
+  color: #6c5ce7;
+  font-size: 0.9rem;
+  background: rgba(108, 92, 231, 0.1);
+  padding: 6px 14px;
+  border-radius: 15px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+/* 批量统计 */
+.batch-stats {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 2px solid rgba(102, 126, 234, 0.15);
+}
+
+.batch-stat-item {
+  text-align: center;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+  border-radius: 18px;
+  border: 2px solid transparent;
+  min-width: 100px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.batch-stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.batch-stat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
+}
+
+.batch-stat-item .stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  display: block;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.batch-stat-item:nth-child(2) .stat-value {
+  background: linear-gradient(135deg, #48dbfb, #0abde3);
+  -webkit-background-clip: text;
+}
+
+.batch-stat-item:nth-child(3) .stat-value {
+  background: linear-gradient(135deg, #00d2d3, #10ac84);
+  -webkit-background-clip: text;
+}
+
+.batch-stat-item:nth-child(4) .stat-value {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  -webkit-background-clip: text;
+}
+
+.batch-stat-item:nth-child(5) .stat-value {
+  background: linear-gradient(135deg, #feca57, #ff9ff3);
+  -webkit-background-clip: text;
+}
+
+.batch-stat-item .stat-label {
+  color: #6c5ce7;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
 /* 动画 */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -1651,6 +2200,11 @@ export default {
     justify-content: center;
   }
 
+  .batch-result-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1658,6 +2212,305 @@ export default {
   .result-primary {
     flex-direction: column;
     text-align: center;
+  }
+
+  .batch-upload-area {
+    min-height: 180px;
+  }
+
+  .batch-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px 0;
+  }
+
+  .batch-thumb {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    transition: all 0.3s;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.15);
+  }
+
+  .batch-thumb:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  }
+
+  .batch-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .remove-thumb {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    box-shadow: 0 3px 10px rgba(255, 107, 107, 0.5);
+    transition: transform 0.2s;
+  }
+
+  .remove-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  .batch-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 15px 0 5px;
+  }
+
+  .add-more-btn {
+    background: linear-gradient(135deg, #48dbfb, #0abde3);
+    border: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(72, 219, 251, 0.35);
+    transition: all 0.3s;
+  }
+
+  .add-more-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(72, 219, 251, 0.45);
+  }
+
+  .batch-detect-btn {
+    min-width: 200px;
+  }
+
+  .clear-all-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.35);
+    transition: all 0.3s;
+  }
+
+  .clear-all-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255, 107, 107, 0.45);
+  }
+
+  /* Batch results */
+  .batch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .batch-header h3 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .image-count {
+    color: #6c5ce7;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+    padding: 6px 16px;
+    border-radius: 20px;
+  }
+
+  .batch-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .batch-result-item {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6));
+    border-radius: 16px;
+    border: 2px solid rgba(102, 126, 234, 0.15);
+    transition: all 0.3s;
+    align-items: center;
+  }
+
+  .batch-result-item:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+  }
+
+  .result-image {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+  }
+
+  .result-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .result-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #a29bfe;
+  }
+
+  .result-info-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .tag {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .tag.fruit-name {
+    background: linear-gradient(135deg, #1a1a2e, #4a4a6a);
+    color: white;
+  }
+
+  .tag.tag-freshness {
+    color: white;
+  }
+  .tag.tag-freshness.fresh {
+    background: linear-gradient(135deg, #00d2d3, #10ac84);
+  }
+  .tag.tag-freshness.rotten {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  }
+
+  .tag.tag-confidence {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+
+  .result-empty-tag {
+    color: #a29bfe;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-count {
+    color: #6c5ce7;
+    font-size: 0.85rem;
+    background: rgba(108, 92, 231, 0.1);
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    align-self: flex-start;
+  }
+
+  /* Batch stats */
+  .batch-stats {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(102, 126, 234, 0.15);
+  }
+
+  .batch-stat-item {
+    text-align: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    border-radius: 15px;
+    border: 2px solid transparent;
+    min-width: 90px;
+    transition: all 0.3s;
+  }
+
+  .batch-stat-item:hover {
+    transform: translateY(-3px);
+  }
+
+  .batch-stat-item .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .batch-stat-item:nth-child(2) .stat-value {
+    background: linear-gradient(135deg, #48dbfb, #0abde3);
+    -webkit-background-clip: text;
+  }
+
+  .batch-stat-item:nth-child(3) .stat-value {
+    background: linear-gradient(135deg, #00d2d3, #10ac84);
+    -webkit-background-clip: text;
+  }
+
+  .batch-stat-item:nth-child(4) .stat-value {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    -webkit-background-clip: text;
+  }
+
+  .batch-stat-item:nth-child(5) .stat-value {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+    -webkit-background-clip: text;
+  }
+
+  .batch-stat-item .stat-label {
+    color: #6c5ce7;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 5px;
   }
 }
 </style>

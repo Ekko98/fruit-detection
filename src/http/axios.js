@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const http = axios.create({
   baseURL: '/api',
-  timeout: 10000,
+  timeout: 60000, // 批量检测需要更长时间
   headers: {
     'Content-Type': 'application/json'
   }
