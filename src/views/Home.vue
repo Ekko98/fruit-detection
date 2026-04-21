@@ -175,9 +175,19 @@
           <h3>批量检测结果</h3>
           <div class="batch-results-list">
             <div v-for="(result, idx) in batchResults" :key="idx" class="batch-result-item">
-              <div class="result-image">
+              <div class="result-image detection-image-container">
                 <img :src="result.imageUrl" alt="结果图片" v-if="result.imageUrl">
                 <div v-else class="result-placeholder"><i class="fas fa-image"></i></div>
+                <div
+                  v-for="(box, bIdx) in result.detections"
+                  :key="bIdx"
+                  class="detection-box"
+                  :class="box.freshness"
+                  :style="getBoxStyle(box)">
+                  <div class="detection-label" :class="box.freshness">
+                    {{ box.fruitType }} · {{ box.freshness === 'fresh' ? '新鲜' : '腐烂' }}
+                  </div>
+                </div>
               </div>
               <div class="result-info-card">
                 <div v-if="result.fruitType" class="result-tags">
@@ -237,7 +247,8 @@
                 v-for="(box, index) in liveDetectionBoxes"
                 :key="index"
                 class="live-detection-box"
-                :style="getLiveBoxStyle(box)">
+                :class="box.freshness"
+                :style="getBoxStyle(box)">
                 <div class="live-detection-label" :class="box.freshness">
                   {{ box.fruitType }} · {{ box.freshness === 'fresh' ? '新鲜' : '腐烂' }}
                 </div>
@@ -450,17 +461,8 @@ export default {
       }
     },
 
-    // 检测框样式
+    // 统一的检测框样式（三种模式共用）
     getBoxStyle(box) {
-      if (!box || !this.imageDimensions.width) return {}
-      return {
-        left: `${box.x * 100}%`,
-        top: `${box.y * 100}%`,
-        width: `${box.width * 100}%`,
-        height: `${box.height * 100}%`
-      }
-    },
-    getLiveBoxStyle(box) {
       if (!box) return {}
       return {
         left: `${box.x * 100}%`,
@@ -1400,6 +1402,7 @@ export default {
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
+  min-height: 500px;
   background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
   box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
 }
@@ -1984,27 +1987,9 @@ export default {
   padding: 20px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
   border-radius: 20px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-  position: relative;
+  border: 2px solid rgba(102, 126, 234, 0.3);
   transition: all 0.3s;
   align-items: center;
-}
-
-.batch-result-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
 }
 
 .batch-result-item:hover {
@@ -2014,7 +1999,7 @@ export default {
 
 .result-image {
   flex-shrink: 0;
-  width: 120px;
+  width: auto;
   height: 120px;
   border-radius: 16px;
   overflow: hidden;
@@ -2023,9 +2008,11 @@ export default {
 }
 
 .result-image img {
-  width: 100%;
   height: 100%;
-  object-fit: cover;
+  width: auto;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .result-placeholder {
@@ -2371,7 +2358,7 @@ export default {
 
   .result-image {
     flex-shrink: 0;
-    width: 100px;
+    width: auto;
     height: 100px;
     border-radius: 14px;
     overflow: hidden;
@@ -2380,9 +2367,11 @@ export default {
   }
 
   .result-image img {
-    width: 100%;
     height: 100%;
-    object-fit: cover;
+    width: auto;
+    display: block;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .result-placeholder {
