@@ -270,7 +270,7 @@
                 <p>💡 使用提示：</p>
                 <ul>
                   <li>首次使用请运行 <code>setup-https.bat</code>（管理员权限）</li>
-                  <li>配置完成后访问: <code>https://192.168.1.124:3000</code></li>
+                  <li>配置完成后访问: <code>{{ accessURL }}</code></li>
                   <li>浏览器提示不安全时点击"高级"→"继续访问"</li>
                   <li>然后点击"开启摄像头"即可使用</li>
                 </ul>
@@ -312,9 +312,20 @@
         </div>
         <div class="history-grid">
           <div v-for="item in validHistoryItems" :key="item.id" class="history-item">
-            <div class="history-image">
+            <div class="history-image detection-image-container">
               <img :src="item.imageUrl" alt="检测图片" v-if="item.imageUrl">
               <div v-else class="placeholder"><i class="fas fa-image"></i></div>
+              <!-- 检测框 -->
+              <div
+                v-for="(box, index) in item.detections"
+                :key="index"
+                class="detection-box"
+                :class="box.freshness"
+                :style="getBoxStyle(box)">
+                <div class="detection-label" :class="box.freshness">
+                  {{ box.fruitType }} · {{ box.freshness === 'fresh' ? '新鲜' : '腐烂' }}
+                </div>
+              </div>
             </div>
             <div class="history-info">
               <span class="fruit-type">{{ item.fruitType }}</span>
@@ -340,7 +351,8 @@ export default {
       mode: 'image', // 'image' | 'batch' | 'camera'
       cameraActive: false,
       detectionFrameInterval: null,
-      liveDetectionBoxes: []
+      liveDetectionBoxes: [],
+      accessURL: window.location.protocol + '//' + window.location.hostname + ':3000'
     }
   },
   computed: {
@@ -350,9 +362,9 @@ export default {
     detectionHistory() {
       return this.$store.state.detectionHistory
     },
-    // 过滤有效的历史记录（有水果类型的）
+    // 过滤有效的历史记录（有水果类型且有检测框的）
     validHistoryItems() {
-      return this.detectionHistory.filter(item => item.fruitType && item.confidence > 0)
+      return this.detectionHistory.filter(item => item.fruitType && item.confidence > 0 && item.detections && item.detections.length > 0)
     },
     batchImages() {
       return this.$store.state.batchImages
@@ -1683,16 +1695,18 @@ export default {
 
 .history-image {
   width: 100%;
-  height: 110px;
-  border-radius: 12px;
-  overflow: hidden;
+  min-height: 110px;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  position: relative;
 }
 
 .history-image img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
 }
 
 .history-info {
@@ -2048,6 +2062,9 @@ export default {
 .tag.fruit-name {
   background: linear-gradient(135deg, #1a1a2e, #4a4a6a);
   color: white;
+  -webkit-text-fill-color: white;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
 }
 
 .tag.tag-freshness {
@@ -2406,6 +2423,9 @@ export default {
   .tag.fruit-name {
     background: linear-gradient(135deg, #1a1a2e, #4a4a6a);
     color: white;
+    -webkit-text-fill-color: white;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
   }
 
   .tag.tag-freshness {

@@ -6,6 +6,7 @@
 - Spring Boot
 - Maven
 - Vue（前端）
+- Python
 
 ## 项目目标
 实现一个水果检测网页：

@@ -66,19 +66,17 @@ export default new Vuex.Store({
       const sourceImage = result.imageUrl || result.imageData || null
       const thumbnailUrl = result.annotatedImage || sourceImage
 
-      detections.forEach(box => {
-        if (!box.fruitType) return
-        const historyItem = {
-          id: Date.now() + Math.random(),
-          imageUrl: sourceImage,
-          thumbnailUrl,
-          fruitType: box.fruitType,
-          freshness: box.freshness,
-          confidence: box.confidence || 0,
-          timestamp: new Date().toLocaleString()
-        }
-        state.detectionHistory.unshift(historyItem)
-      })
+      const historyItem = {
+        id: Date.now() + Math.random(),
+        imageUrl: sourceImage,
+        thumbnailUrl,
+        fruitType: result.fruitType,
+        freshness: result.freshness,
+        confidence: result.confidence || 0,
+        detections: detections,
+        timestamp: new Date().toLocaleString()
+      }
+      state.detectionHistory.unshift(historyItem)
 
       if (state.detectionHistory.length > 10) {
         state.detectionHistory = state.detectionHistory.slice(0, 10)
@@ -130,21 +128,17 @@ export default new Vuex.Store({
       const sourceImage = result.imageUrl || result.imageData || state.imageUrl || null
       const thumbnailUrl = result.annotatedImage || sourceImage
 
-      detections.forEach(box => {
-        // 过滤无效检测框
-        if (!box.fruitType) return
-
-        const historyItem = {
-          id: Date.now() + Math.random(),
-          imageUrl: sourceImage,
-          thumbnailUrl,
-          fruitType: box.fruitType,
-          freshness: box.freshness,
-          confidence: box.confidence || 0,
-          timestamp: new Date().toLocaleString()
-        }
-        state.detectionHistory.unshift(historyItem)
-      })
+      const historyItem = {
+        id: Date.now() + Math.random(),
+        imageUrl: sourceImage,
+        thumbnailUrl,
+        fruitType: result.fruitType,
+        freshness: result.freshness,
+        confidence: result.confidence || 0,
+        detections: detections,
+        timestamp: new Date().toLocaleString()
+      }
+      state.detectionHistory.unshift(historyItem)
 
       if (state.detectionHistory.length > 10) {
         state.detectionHistory = state.detectionHistory.slice(0, 10)
