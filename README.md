@@ -7,7 +7,7 @@
 | 层级 | 技术 |
 |------|------|
 | 后端 | Java 8 + Spring Boot 2.7.5 + Maven + OpenCV 4.5.1 |
-| 前端 | Vue 2.6 + Vuex 3.6 + Vue Router 3.5 + Axios |
+| 前端 | Vue 2.6 + Vuex 3.6 + Vue Router 3.5 + Axios + JSZip + file-saver |
 | 检测引擎 | Python 3 + YOLOv8 (Ultralytics) + Flask + OpenCV-Python |
 
 ## 项目结构
@@ -26,7 +26,7 @@ fruit-detection/
 │   ├── router/index.js                  # 路由（仅首页）
 │   ├── store/index.js                   # Vuex 状态管理
 │   ├── http/axios.js                    # Axios 实例（baseURL=/api, timeout=60s）
-│   ├── views/Home.vue                   # 主页面（图片/批量/实时三模式）
+│   ├── views/Home.vue                   # 主页面（图片/批量/实时三模式，多巴胺风格UI，历史记录导出）
 │   └── test.html                        # 调试页面
 │
 ├── src/main/java/com/example/fruitdetection/
@@ -84,8 +84,8 @@ fruit-detection/
 
 - **单张图片检测**：上传 JPG/PNG，返回水果类型（apple/banana/orange）、新鲜度（fresh/rotten）、置信度、检测框坐标；图片上叠加 OpenCV 绘制的高亮框
 - **批量检测**：一次上传最多 10 张图片，逐张调用检测服务，返回结果列表与汇总统计
-- **实时检测**：调用摄像头（需 HTTPS），每秒截取一帧发送至后端检测，叠加动态检测框与扫描线动画
-- **历史记录**：前端本地保存最近 10 条有效检测结果，含缩略图、时间戳、统计
+- **实时检测**：调用摄像头（需 HTTPS），每秒截取一帧发送至后端检测，叠加动态检测框与扫描线动画；前端自动适配动态 IP（通过 `window.location.hostname` 动态获取后端地址）
+- **历史记录**：前端本地保存最近 10 条有效检测结果，含缩略图（带检测框）、时间戳、统计；支持一键导出所有图片为 ZIP 压缩包
 
 ## 检测引擎双模式
 
