@@ -305,10 +305,16 @@
       <div v-if="validHistoryItems.length > 0" class="history-section glass-card">
         <div class="history-header">
           <h3>检测历史</h3>
-          <button @click="clearHistory" class="clear-history-btn">
-            <i class="fas fa-trash"></i>
-            清空
-          </button>
+          <div class="history-actions">
+            <button @click="exportHistory" class="export-history-btn">
+              <i class="fas fa-download"></i>
+              导出图片
+            </button>
+            <button @click="clearHistory" class="clear-history-btn">
+              <i class="fas fa-trash"></i>
+              清空
+            </button>
+          </div>
         </div>
         <div class="history-grid">
           <div v-for="item in validHistoryItems" :key="item.id" class="history-item">
@@ -341,6 +347,9 @@
 </template>
 
 <script>
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
+
 export default {
   name: 'HomePage',
   data() {
@@ -709,6 +718,36 @@ export default {
     // 清空历史
     clearHistory() {
       this.$store.commit('clearHistory')
+    },
+
+    // 导出历史记录图片为ZIP
+    async exportHistory() {
+      const items = this.validHistoryItems
+      if (items.length === 0) return
+
+      const zip = new JSZip()
+      const folder = zip.folder('detection-history')
+
+      items.forEach((item, index) => {
+        const imageUrl = item.thumbnailUrl || item.imageUrl
+        if (!imageUrl) return
+
+        const base64Data = imageUrl.split(',')[1]
+        if (!base64Data) return
+
+        const mimeMatch = imageUrl.match(/data:image\/(\w+)/)
+        const ext = mimeMatch ? mimeMatch[1].replace('jpeg', 'jpg') : 'jpg'
+
+        const fruitType = item.fruitType || 'unknown'
+        const freshness = item.freshness || 'unknown'
+        const timestamp = item.timestamp.replace(/[/\\:]/g, '-').replace(/\s/g, '_')
+
+        const fileName = `${String(index + 1).padStart(2, '0')}_${fruitType}_${freshness}_${timestamp}.${ext}`
+        folder.file(fileName, base64Data, { base64: true })
+      })
+
+      const content = await zip.generateAsync({ type: 'blob' })
+      saveAs(content, `detection-history-${new Date().toISOString().slice(0, 10)}.zip`)
     },
 
     // 批量检测相关方法
@@ -1637,6 +1676,31 @@ export default {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+
+.history-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.export-history-btn {
+  background: linear-gradient(135deg, #48dbfb, #0abde3);
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(72, 219, 251, 0.3);
+}
+
+.export-history-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(72, 219, 251, 0.4);
 }
 
 .clear-history-btn {
